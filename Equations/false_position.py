@@ -1,39 +1,50 @@
-MAX_ITERATION = 100000
-
-# Example function for calculation
-# x^3 - x^2 + 2
+import math
+from tabulate import tabulate
 
 
-def func(x: float) -> float:
-    return x**3 - x**2 + 2
+N0 = 1000
+TOL = 10**-4
 
 
-def false_position(a: float, b: float) -> None:
-    if func(a) * func(b) >= 0:
-        print('You have not assumed right a and b')
-        return
+def f(x):
+    return math.cos(x) - x
 
-    c = a
 
-    for i in range(MAX_ITERATION):
-        c = (a * func(b) - b * func(a)) / (func(b) - func(a))
+def false_position(p0, p1):
+    steps = []
+    success = False
+    p = 0
 
-        if func(c) == 0:
+    q0 = f(p0)
+    q1 = f(p1)
+    for i in range(1, N0):
+        p = p1 - q1 * (p1 - p0) / (q1 - q0)
+
+        steps.append([i, p0, p1, p, f(p)])
+
+        if abs(p - p1) < TOL:
+            success = True
             break
 
-        elif func(c) * func(a) < 0:
-            b = c
+        q = f(p)
 
-        else:
-            a = c
+        if q * q1 < 0:
+            p0 = p1
+            q0 = q1
 
-    print(f'The value of root is: {c:.4f}')
+        p1 = p
+        q1 = q
+
+    print(tabulate(steps, headers=['n', 'p0', 'p1', 'p', 'f(p)']), '\n')
+
+    if (success):
+        print(f'Solution: {p}')
+    else:
+        print('The procedure was unsuccessful')
 
 
 def main():
-    a = -200
-    b = 300
-    false_position(a, b)
+    false_position(0.5, math.pi / 4)
 
 
 if __name__ == '__main__':
