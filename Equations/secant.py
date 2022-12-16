@@ -1,59 +1,47 @@
-# function takes value of x
-# and returns func(x)
-def func(x: float) -> float:
-
-    # we are taking equation
-    # as x^3+x-1
-    f = pow(x, 3) + x - 1
-    return f
+import math
+from tabulate import tabulate
 
 
-def secant(x1: float, x2: float, epsilon: float) -> None:
-    n = 0
-    xm = 0
-    x0 = 0
-    c = 0
-    if (func(x1) * func(x2) < 0):
-        while True:
+N0 = 1000
+TOL = 10**-4
 
-            # calculate the intermediate value
-            x0 = ((x1 * func(x2) - x2 * func(x1)) /
-                  (func(x2) - func(x1)))
 
-            # check if x0 is root of
-            # equation or not
-            c = func(x1) * func(x0)
+def f(x):
+    return math.cos(x) - x
 
-            # update the value of interval
-            x1 = x2
-            x2 = x0
 
-            # update number of iteration
-            n += 1
+def secant(p0, p1):
+    steps = []
+    success = False
+    p = 0
 
-            # if x0 is the root of equation
-            # then break the loop
-            if (c == 0):
-                break
-            xm = ((x1 * func(x2) - x2 * func(x1)) /
-                  (func(x2) - func(x1)))
+    q0 = f(p0)
+    q1 = f(p1)
+    for i in range(1, N0):
+        p = p1 - q1 * (p1 - p0) / (q1 - q0)
 
-            if (abs(xm - x0) < epsilon):
-                break
+        steps.append([i, p0, p1, p, f(p)])
 
-        print("Root of the given equation =",
-              round(x0, 6))
-        print("No. of iterations = ", n)
+        if abs(p - p1) < TOL:
+            success = True
+            break
 
+        p0 = p1
+        q0 = q1
+        p1 = p
+        q1 = f(p)
+
+    print(tabulate(steps, headers=['n', 'p0', 'p1', 'p', 'f(p)']))
+
+    if (success):
+        print(f'Solution: {p}')
     else:
-        print("Can not find a root in ",
-              "the given interval")
-
-# Driver code
+        print('The procedure was unsuccessful')
 
 
-# initializing the values
-x1 = 0
-x2 = 1
-EPSILON = 0.0001
-secant(x1, x2, EPSILON)
+def main():
+    secant(0.5, math.pi / 4)
+
+
+if __name__ == '__main__':
+    main()
