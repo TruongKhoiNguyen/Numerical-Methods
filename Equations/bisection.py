@@ -1,40 +1,36 @@
-# An example function whose
-# solution is determined using
-# Bisection Method.
-# The function is x^3 - x^2  + 2
-def func(x: float) -> float:
-    return x*x*x - x*x + 2
+from tabulate import tabulate
+
+TOL = 10**-4
+N0 = 1000
 
 
-# Prints root of func(x)
-# with error of EPSILON
-def bisection(a: float, b: float) -> float | None:
+def bisection(f, a, b):
+    calculation_step = []
 
-    if (func(a) * func(b) >= 0):
-        print("You have not assumed right a and b\n")
-        return
+    fa = f(a)
 
-    c = a
-    while ((b-a) >= 0.01):
+    for i in range(1, N0):
+        p = a + (b - a) / 2
+        fp = f(p)
 
-        # Find middle point
-        c = (a+b)/2
+        calculation_step.append([i, a, b, p, fp])
 
-        # Check if middle point is root
-        if (func(c) == 0.0):
+        if fp == 0 or (b - a) / 2 < TOL:
             break
 
-        # Decide the side to repeat the steps
-        if (func(c)*func(a) < 0):
-            b = c
+        if fa * fp > 0:
+            a = p
+            fa = fp
+
         else:
-            a = c
+            b = p
 
-    print("The value of root is : ", "%.4f" % c)
+    print(tabulate(calculation_step, headers=['n', 'a', 'b', 'p', 'f(p)']))
 
 
-# Driver code
-# Initial values assumed
-a = -200
-b = 300
-bisection(a, b)
+def main():
+    bisection(lambda x: x**3 + 4*x**2 - 10, 1.0, 2.0)
+
+
+if __name__ == '__main__':
+    main()
