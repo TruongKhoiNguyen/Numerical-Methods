@@ -1,52 +1,47 @@
-import math
+from tabulate import tabulate
+
+N0 = 1000
+TOL = 10**-4
 
 
-# Function x^3 + x^2 - 1
-def f(x: float) -> float:
-    return x*x*x + x*x - 1
+def f(x):
+    return 2*x**2 - 2*x - 5
 
 
-# Re-writing f(x)=0 to x = g(x)
-def g(x: float) -> float:
-    return 1/math.sqrt(1+x)
+def g(x):
+    return ((2*x + 5) / 2)**(1/3)
 
 
-# Implementing Fixed Point Iteration Method
-def fixed_point_iteration(x0: float, epsilon: float, N: int) -> None:
-    print('\n\n*** FIXED POINT ITERATION ***')
-    step = 1
-    flag = 1
-    x1 = 0
-    condition = True
-    while condition:
-        x1 = g(x0)
-        print('Iteration-%d, x1 = %0.6f and f(x1) = %0.6f' % (step, x1, f(x1)))
-        x0 = x1
+def fixed_pointed_iteration(p0):
+    """
+    Condition: g'(x0) < 1
+    """
 
-        step = step + 1
+    steps = []
+    success = False
+    p = 0
+    for i in range(1, N0):
+        p = g(p0)
 
-        if step > N:
-            flag = 0
+        steps.append([i, p0, p, f(p)])
+
+        if abs(p - p0) < TOL:
+            success = True
             break
 
-        condition = abs(f(x1)) > epsilon
+        p0 = p
 
-    if flag == 1:
-        print(f'\nRequired root is: {x1:.8f}')
+    print(tabulate(steps, headers=['n', 'p0', 'p', 'f(p)']), '\n')
+
+    if (success):
+        print(f'Solution: {p}')
     else:
-        print('\nNot Convergent.')
+        print('The procedure was unsuccessful')
 
 
-# Input Section
-x0 = input('Enter Guess: ')
-epsilon = input('Tolerable Error: ')
-N = input('Maximum Step: ')
+def main():
+    fixed_pointed_iteration(1.5)
 
-# Converting x0 and epsilon to float
-x0 = float(x0)
-epsilon = float(epsilon)
 
-# Converting N to integer
-N = int(N)
-
-fixed_point_iteration(x0, epsilon, N)
+if __name__ == '__main__':
+    main()
