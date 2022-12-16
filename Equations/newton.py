@@ -1,31 +1,52 @@
-# An example function whose solution
-# is determined using Bisection Method.
-# The function is x^3 - x^2 + 2
-def func(x: float) -> float:
-    return x * x * x - x * x + 2
+from tabulate import tabulate
 
-# Derivative of the above function
-# which is 3*x^x - 2*x
+N0 = 1000
+TOL = 10**-4
 
 
-def derived_func(x: float) -> float:
-    return 3 * x * x - 2 * x
-
-# Function to find the root
-
-
-def newton_calc(x: float) -> float:
-    h = func(x) / derived_func(x)
-    while abs(h) >= 0.0001:
-        h = func(x)/derived_func(x)
-
-        # x(i+1) = x(i) - f(x) / f'(x)
-        x = x - h
-
-    print("The value of the root is : ",
-          "%.4f" % x)
+def f(x) -> float:
+    """
+    Function to find solution
+    """
+    return x**2 - 2
 
 
-# Driver program to test above
-x0 = -20  # Initial values assumed
-newton_calc(x0)
+def df(x) -> float:
+    """
+    Derivative of f
+    """
+    return 2*x
+
+
+def newton(p0: float):
+    """
+    Condition: f need to be differentiable
+    """
+    steps = []
+    success = False
+    p = 0
+    for i in range(1, N0):
+        p = p0 - f(p0) / df(p0)
+
+        steps.append([i, p0, p, f(p)])
+
+        if abs(p - p0) < TOL:
+            success = True
+            break
+
+        p0 = p
+
+    print(tabulate(steps, headers=['n', 'p0', 'p', 'f(p)']))
+
+    if (success):
+        print(f'Solution: {p}')
+    else:
+        print('The procedure was unsuccessful')
+
+
+def main():
+    newton(2)
+
+
+if __name__ == '__main__':
+    main()
