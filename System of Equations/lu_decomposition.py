@@ -1,42 +1,41 @@
+import numpy as np
+from tabulate import tabulate
+
 Matrix = list[list]
 
 
-def lu_decomposition(mat: Matrix) -> list[Matrix]:
-    '''
-    This function assumes that the matrix has the size n x n.
-    This function use Doolittle method to decompose the input matrix
-    '''
-
-    n: int = len(mat)
-
-    upper: Matrix = [[0 for x in range(n)] for y in range(n)]
-    lower: Matrix = [[0 for x in range(n)] for y in range(n)]
+def doolittle(mat):
+    n = len(mat)
 
     for i in range(n):
+        # calculate part for L
+        for j in range(0, i):
+            a = mat[i][j]
+            for p in range(0, j):
+                a = a - mat[i][p] * mat[p][j]
+
+            mat[i][j] = a / mat[j][j]
+
+        # calculate part for U
         for j in range(i, n):
-            sum = 0
-            for k in range(0, i):
-                sum += lower[i][k] * upper[k][j]
+            a = mat[i][j]
+            for p in range(0, i):
+                a = a - mat[i][p] * mat[p][j]
 
-            upper[i][j] = mat[i][j] - sum
+            mat[i][j] = a
 
-        for j in range(i, n):
-            if i == 0:
-                lower[j][i] = mat[j][i] / upper[i][i]
+    U = np.triu(mat)
 
-            else:
-                sum = 0
-                for k in range(0, i):
-                    sum += lower[j][k] * upper[k][i]
+    L = np.tril(mat, k=-1)
+    np.fill_diagonal(L, 1)
 
-                lower[j][i] = (mat[j][i] - sum) / upper[i][i]
-
-    result = [lower, upper]
-
-    return result
+    return L, U
 
 
-def forward_substitution(mat: Matrix, vec: list) -> list[float]:
+def forward_substitution(mat, vec: list) -> list[float]:
+    """
+    Solve Ly = b
+    """
     n: int = len(mat)
 
     result: list[float] = []
@@ -51,7 +50,10 @@ def forward_substitution(mat: Matrix, vec: list) -> list[float]:
     return result
 
 
-def backward_substitution(mat: Matrix, vec: list) -> list[float]:
+def backward_substitution(mat, vec: list) -> list[float]:
+    """
+    Solve: Ux = y
+    """
     n: int = len(mat)
 
     result: list[float] = [0 for i in range(n)]
@@ -66,11 +68,13 @@ def backward_substitution(mat: Matrix, vec: list) -> list[float]:
     return result
 
 
-def lu_solver(mat: Matrix, vec: list[float]) -> list[float]:
-    factorization: list[Matrix] = lu_decomposition(mat)
+def lu_solver(mat, vec: list[float]) -> list[float]:
+    L, U = doolittle(mat)
 
-    L: Matrix = factorization[0]
-    U: Matrix = factorization[1]
+    print('L: ')
+    print(tabulate(L, tablefmt='simple_grid'))
+    print('U: ')
+    print(tabulate(U, tablefmt='simple_grid'), '\n')
 
     y: list[float] = forward_substitution(L, vec)
     x: list[float] = backward_substitution(U, y)
@@ -79,15 +83,17 @@ def lu_solver(mat: Matrix, vec: list[float]) -> list[float]:
 
 
 def main() -> None:
-    mat: Matrix = [[2, 1, -2],
-                   [3, -3, -1],
-                   [1, -2, 3]]
+    mat = np.array([[7, -2, 1],
+                    [14, -7, -3],
+                    [-7, 11, 18]])
 
-    vec: list[float] = [-1, 5, 6]
+    vec: list[float] = [12, 17, 5]
+
+    # Solutions: [3, 4, -1]
 
     result: list = lu_solver(mat, vec)
 
-    print(result)
+    print('Solution:', result)
 
 
 if __name__ == '__main__':
