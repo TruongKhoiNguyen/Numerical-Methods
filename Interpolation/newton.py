@@ -1,74 +1,26 @@
-# Function to find the product term
-def proterm(i, value, x):
-    pro = 1
-    for j in range(i):
-        pro = pro * (value - x[j])
-    return pro
-
-# Function for calculating
-# divided difference table
+import functools
+import numpy as np
 
 
-def dividedDiffTable(x, y, n):
+def newton(x, y, xp):
+    n = len(x)
+    difference_table = [y.tolist()]
 
     for i in range(1, n):
-        for j in range(n - i):
-            y[j][i] = ((y[j][i - 1] - y[j + 1][i - 1]) /
-                       (x[j] - x[i + j]))
-    return y
+        difference_table.append([(difference_table[i - 1][j + 1] - difference_table[i - 1][j]) / (x[j + i] - x[j])
+                                for j in range(len(difference_table[i - 1]) - 1)])
 
-# Function for applying Newton's
-# divided difference formula
+    yp = functools.reduce(lambda a, b: a + b, [difference_table[i][0] * functools.reduce(
+        lambda a, b: a * b, map(lambda x: xp - x, x[:i]), 1) for i in range(n)])
 
-
-def applyFormula(value, x, y, n):
-
-    sum = y[0][0]
-
-    for i in range(1, n):
-        sum = sum + (proterm(i, value, x) * y[0][i])
-
-    return sum
-
-# Function for displaying divided
-# difference table
-
-
-def printDiffTable(y, n):
-
-    for i in range(n):
-        for j in range(n - i):
-            print(round(y[i][j], 4), "\t",
-                  end=" ")
-
-        print("")
+    print('Interpolated value:', yp)
 
 
 def main():
-    n = 4
-    y = [[0 for i in range(10)]
-         for j in range(10)]
-    x = [5, 6, 9, 11]
+    x = np.array([8.0, 9.0, 9.5, 11.0])
+    y = np.array([2.079442, 2.197225, 2.251292, 2.397895])
 
-    # y[][] is used for divided difference
-    # table where y[][0] is used for input
-    y[0][0] = 12
-    y[1][0] = 13
-    y[2][0] = 14
-    y[3][0] = 16
-
-    # calculating divided difference table
-    y = dividedDiffTable(x, y, n)
-
-    # displaying divided difference table
-    printDiffTable(y, n)
-
-    # value to be interpolated
-    value = 7
-
-    # printing the value
-    print("\nValue at", value, "is",
-          round(applyFormula(value, x, y, n), 2))
+    newton(x, y, 9.2)
 
 
 if __name__ == '__main__':
