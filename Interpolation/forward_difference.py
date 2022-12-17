@@ -1,53 +1,35 @@
 import math
+import functools
+import numpy as np
 
 
-# calculating u mentioned in the formula
-def u_cal(u, n):
+def forward_difference(x, y, xp):
+    n = len(x)
+    h = x[1] - x[0]
+    r = (xp - x[0])/h
 
-    temp = u
+    difference_table = [y.tolist()]
+
     for i in range(1, n):
-        temp = temp * (u - i)
-    return temp
+        difference_table.append(
+            [difference_table[i - 1][j+1] - difference_table[i - 1][j] for j in range(n - i)])
+
+    print(difference_table)
+
+    yp = 0
+    product = 1
+    for i in range(n):
+        product *= functools.reduce(lambda a, b: a * b,
+                                    [r - j for j in range(i)], 1)
+        yp += difference_table[i][0] * product / math.factorial(i)
+
+    print('Interpolated value:', yp)
 
 
 def main():
-    # Number of values given
-    n = 4
-    x = [45, 50, 55, 60]
-
-    # y[][] is used for difference table
-    # with y[][0] used for input
-    y = [[0.0 for i in range(n)]
-         for j in range(n)]
-    y[0][0] = 0.7071
-    y[1][0] = 0.7660
-    y[2][0] = 0.8192
-    y[3][0] = 0.8660
-
-    # Calculating the forward difference
-    # table
-    for i in range(1, n):
-        for j in range(n - i):
-            y[j][i] = y[j + 1][i - 1] - y[j][i - 1]
-
-    # Displaying the forward difference table
-    for i in range(n):
-        print(x[i], end="\t")
-        for j in range(n - i):
-            print(y[i][j], end="\t")
-        print("")
-
-    # Value to interpolate at
-    value = 52
-
-    # initializing u and sum
-    sum = y[0][0]
-    u = (value - x[0]) / (x[1] - x[0])
-    for i in range(1, n):
-        sum = sum + (u_cal(u, i) * y[0][i]) / math.factorial(i)
-
-    print("\nValue at", value,
-          "is", round(sum, 6))
+    x = np.array([8.0, 9.0, 10.0, 11.0])
+    y = np.array([2.07944154, 2.19722458, 2.30258509, 2.39789527])
+    forward_difference(x, y, 9.2)
 
 
 if __name__ == '__main__':
