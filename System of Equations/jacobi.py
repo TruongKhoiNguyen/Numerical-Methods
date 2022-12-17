@@ -1,35 +1,81 @@
-from pprint import pprint
-from numpy import array, zeros, diag, diagflat, dot
+import numpy as np
+from tabulate import tabulate
 
 
-def jacobi(A, b, N=25, x=None):
-    """Solves the equation Ax=b via the Jacobi iterative method."""
-    # Create an initial guess if needed
-    if x is None:
-        x = zeros(len(A[0]))
+class JacobiSolver:
+    def __init__(self, a, b, x0, n):
+        self.A = a
+        self.B = b
+        self.N = n
+        self.X0 = x0
 
-    # Create a vector of the diagonal elements of A
-    # and subtract them from A
-    D = diag(A)
-    R = A - diagflat(D)
+        self.steps = []
 
-    # Iterate for N times
-    for i in range(N):
-        x = (b - dot(R, x)) / D
-    return x
+    def solve(self):
+        size = len(self.A)
+
+        x = self.X0
+
+        self.steps.append([0, *x.copy()])
+
+        for iter in range(1, self.N):
+            for i in range(size):
+                tmp = np.array([self.A[i][j] * x[j] for j in range(size)])
+                sum = np.sum(tmp[:i]) + np.sum(tmp[i+1:])
+
+                x[i] = (self.B[i] - sum) / self.A[i][i]
+
+            self.steps.append([iter, *x.copy()])
+
+        headers = list(map(lambda x: f'x{x}', range(1, size + 1)))
+        print(tabulate(self.steps, headers=headers))
 
 
-A = array([[2.0, 1.0], [5.0, 7.0]])
-b = array([11.0, 13.0])
-guess = array([1.0, 1.0])
+class JacobiSolverBuilder:
+    A = None
+    B = None
+    N = 25
+    X0 = None
 
-sol = jacobi(A, b, N=25, x=guess)
+    def set_A(self, a):
+        self.A = a
 
-print("A:")
-pprint(A)
+        return self
 
-print("b:")
-pprint(b)
+    def set_B(self, b):
+        self.B = b
 
-print("x:")
-pprint(sol)
+        return self
+
+    def set_X0(self, x0):
+        self.X0 = x0
+
+        return self
+
+    def set_N(self, n):
+        self.N = n
+        return self
+
+    def build(self):
+        return JacobiSolver(self.A, self.B, self.X0, self.N)
+
+
+def main():
+    A = np.array([[10, -1, 2, 0],
+                  [-1, 11, -1, 3],
+                  [2, -1, 10, -1],
+                  [0, 3, -1, 8]])
+
+    B = np.array([6, 25, -11, 15])
+
+    JacobiSolverBuilder() \
+        .set_A(A) \
+        .set_B(B) \
+        .set_X0(np.zeros(len(A))) \
+        .set_N(8) \
+        .build()  \
+        .solve()
+
+
+if __name__ == '__main__':
+    main()
