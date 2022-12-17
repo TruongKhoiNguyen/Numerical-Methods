@@ -1,60 +1,25 @@
-class DataPoint:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
+import functools
+import numpy as np
 
 
-# function to interpolate the given data points
-# using Lagrange's formula
-# xi -> corresponds to the new data point
-# whose value is to be obtained
-# n -> represents the number of known data points
-def interpolate(f: list, xi: float, n: int) -> float:
+def lagrange(x, y, xp):
+    n = len(x)
+    yp = 0
 
-    # Initialize result
-    result = 0.0
     for i in range(n):
+        p = functools.reduce(lambda a, b: a * b, map(lambda e: (xp - e) /
+                             (x[i] - e), np.concatenate([x[:i], x[i+1:]])))
 
-        # Compute individual terms of above formula
-        term = f[i].y
-        for j in range(n):
-            if j != i:
-                term = term * (xi - f[j].x) / (f[i].x - f[j].x)
+        yp = yp + p * y[i]
 
-        # Add current term to result
-        result += term
-
-    return result
+    return yp
 
 
 def main():
-    # Get input
-    data_points: list[DataPoint] = []
+    x = np.array([9.0, 9.5, 11])
+    y = np.array([2.1972, 2.2513, 2.3979])
 
-    n = input('Get the number of data points: ')
-    n = int(n)
-
-    for i in range(n):
-        x_tmp = input(f'x{i} = ')
-        x_tmp = float(x_tmp)
-
-        f_tmp = input(f'f{i} = ')
-        f_tmp = float(f_tmp)
-
-        data_points.append(DataPoint(x_tmp, f_tmp))
-
-    cal_input = input('Get x you want to calculate: ')
-    cal_input = float(cal_input)
-
-    # Print input (This is used for testing purpose)
-    for i in range(n):
-        print(f'({data_points[i].x}, {data_points[i].y})')
-
-    # Calculate
-    result = interpolate(data_points, cal_input, n)
-
-    # Print output
-    print(f'The value of f({cal_input}) is {result}')
+    print('Interpolated value:', lagrange(x, y, 9.2))
 
 
 if __name__ == '__main__':
