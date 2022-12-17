@@ -1,39 +1,81 @@
-# Defining our function as gauss_seidel which takes 3 arguments
-# as A matrix, Solution and B matrix
-
-Matrix = list[list[float]]
+import numpy as np
+from tabulate import tabulate
 
 
-def gauss_seidel(a, x, b) -> list[float]:
-    # Finding length of a(3)
-    n = len(a)
-    # for loop for 3 times as to calculate x, y , z
-    for j in range(0, n):
-        # temp variable d to store b[j]
-        d = b[j]
+class GaussSeidelSolver:
+    def __init__(self, a, b, x0, n):
+        self.A = a
+        self.B = b
+        self.N = n
+        self.X0 = x0
 
-        # to calculate respective xi, yi, zi
-        for i in range(0, n):
-            if (j != i):
-                d -= a[j][i] * x[i]
-        # updating the value of our solution
-        x[j] = d / a[j][j]
-    # returning our updated solution
-    return x
+        self.steps = []
+
+    def solve(self):
+        size = len(self.A)
+
+        x = self.X0
+
+        self.steps.append([0, *x.copy()])
+
+        for iter in range(1, self.N):
+            for i in range(size):
+                tmp = np.array([self.A[i][j] * x[j] for j in range(size)])
+                sum = np.sum(tmp[:i]) + np.sum(tmp[i+1:])
+
+                x[i] = (self.B[i] - sum) / self.A[i][i]
+
+            self.steps.append([iter, *x.copy()])
+
+        headers = list(map(lambda x: f'x{x}', range(1, size + 1)))
+        print(tabulate(self.steps, headers=headers))
 
 
-# int(input())input as number of variable to be solved
-n = 3
-a = []
-b = []
-# initial solution depending on n(here n=3)
-x = [0, 0, 0]
-a = [[4, 1, 2], [3, 5, 1], [1, 1, 3]]
-b = [4, 7, 3]
-print(x)
+class GaussSeidelSolverBuilder:
+    A = None
+    B = None
+    N = 25
+    X0 = None
 
-# loop run for m times depending on m the error value
-for i in range(0, 25):
-    x = gauss_seidel(a, x, b)
-    # print each time the updated solution
-    print(x)
+    def set_A(self, a):
+        self.A = a
+
+        return self
+
+    def set_B(self, b):
+        self.B = b
+
+        return self
+
+    def set_X0(self, x0):
+        self.X0 = x0
+
+        return self
+
+    def set_N(self, n):
+        self.N = n
+        return self
+
+    def build(self):
+        return GaussSeidelSolver(self.A, self.B, self.X0, self.N)
+
+
+def main():
+    A = np.array([[10, -1, 2, 0],
+                  [-1, 11, -1, 3],
+                  [2, -1, 10, -1],
+                  [0, 3, -1, 8]])
+
+    B = np.array([6, 25, -11, 15])
+
+    GaussSeidelSolverBuilder() \
+        .set_A(A) \
+        .set_B(B) \
+        .set_X0(np.zeros(len(A))) \
+        .set_N(8) \
+        .build()  \
+        .solve()
+
+
+if __name__ == '__main__':
+    main()

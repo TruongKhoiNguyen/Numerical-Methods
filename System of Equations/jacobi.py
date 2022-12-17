@@ -18,13 +18,15 @@ class JacobiSolver:
 
         self.steps.append([0, *x.copy()])
 
+        x_tmp = x.copy()
         for iter in range(1, self.N):
             for i in range(size):
                 tmp = np.array([self.A[i][j] * x[j] for j in range(size)])
                 sum = np.sum(tmp[:i]) + np.sum(tmp[i+1:])
 
-                x[i] = (self.B[i] - sum) / self.A[i][i]
+                x_tmp[i] = (self.B[i] - sum) / self.A[i][i]
 
+            x = x_tmp.copy()
             self.steps.append([iter, *x.copy()])
 
         headers = list(map(lambda x: f'x{x}', range(1, size + 1)))
@@ -72,7 +74,7 @@ def main():
         .set_A(A) \
         .set_B(B) \
         .set_X0(np.zeros(len(A))) \
-        .set_N(8) \
+        .set_N(15) \
         .build()  \
         .solve()
 
