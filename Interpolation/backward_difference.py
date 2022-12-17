@@ -1,50 +1,33 @@
 import math
+import functools
+import numpy as np
 
 
-# Calculation of u mentioned in formula
-def u_cal(u, n):
-    temp = u
+def backward_difference(x, y, xp):
+    n = len(x)
+    h = x[1] - x[0]
+    r = (xp - x[n - 1]) / h
+    difference_table = [y.tolist()]
+
+    for i in range(1, n):
+        difference_table.append(
+            [difference_table[i - 1][j] - difference_table[i - 1][j - 1] for j in range(1, n - i + 1)])
+
+    yp = 0
+    product = 1
     for i in range(n):
-        temp = temp * (u + i)
-    return temp
+        product *= functools.reduce(lambda a, b: a * b,
+                                    [r + j for j in range(i)], 1)
+        yp += difference_table[i][-1] * product / math.factorial(i)
+
+    print('Interpolated value:', yp)
 
 
 def main():
+    x = np.array([1.7, 1.8, 1.9, 2.0])
+    y = np.array([0.3979849, 0.3399864, 0.2818186, 0.2238908])
 
-    # number of values given
-    n = 5
-    x = [1891, 1901, 1911, 1921, 1931]
-
-    # y is used for difference
-    # table and y[0] used for input
-    y = [[0.0 for _ in range(n)] for __ in range(n)]
-    y[0][0] = 46
-    y[1][0] = 66
-    y[2][0] = 81
-    y[3][0] = 93
-    y[4][0] = 101
-
-    # Calculating the backward difference table
-    for i in range(1, n):
-        for j in range(n - 1, i - 1, -1):
-            y[j][i] = y[j][i - 1] - y[j - 1][i - 1]
-
-    # Displaying the backward difference table
-    for i in range(n):
-        for j in range(i + 1):
-            print(y[i][j], end="\t")
-        print()
-
-    # Value to interpolate at
-    value = 1925
-
-    # Initializing u and sum
-    sum = y[n - 1][0]
-    u = (value - x[n - 1]) / (x[1] - x[0])
-    for i in range(1, n):
-        sum = sum + (u_cal(u, i) * y[n - 1][i]) / math.factorial(i)
-
-    print("\n Value at", value, "is", sum)
+    backward_difference(x, y, 1.72)
 
 
 if __name__ == '__main__':

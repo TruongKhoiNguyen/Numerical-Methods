@@ -14,8 +14,6 @@ def forward_difference(x, y, xp):
         difference_table.append(
             [difference_table[i - 1][j+1] - difference_table[i - 1][j] for j in range(n - i)])
 
-    print(difference_table)
-
     yp = 0
     product = 1
     for i in range(n):
@@ -27,9 +25,10 @@ def forward_difference(x, y, xp):
 
 
 def main():
-    x = np.array([8.0, 9.0, 10.0, 11.0])
-    y = np.array([2.07944154, 2.19722458, 2.30258509, 2.39789527])
-    forward_difference(x, y, 9.2)
+    x = np.array([1.7, 1.8, 1.9, 2.0])
+    y = np.array([0.3979849, 0.3399864, 0.2818186, 0.2238908])
+
+    forward_difference(x, y, 1.72)
 
 
 if __name__ == '__main__':
