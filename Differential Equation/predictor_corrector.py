@@ -1,8 +1,19 @@
 from tabulate import tabulate
+import math
+
+
+def func(x):
+    '''
+    Real solution of f
+    '''
+    return 1 + 1/2 * math.exp(-4 * x) - 1/2 * math.exp(-2 * x)
 
 
 def f(x, y):
-    return x + y
+    '''
+    y' + 2y = 2 - exp(-4x)
+    '''
+    return 2 - math.exp(-4 * x) - 2 * y
 
 
 def predictor(x, y, h):
@@ -27,9 +38,14 @@ def main():
         yp = predictor(x, y, H)
         f_half = f(x + 1/2 * H, yp)
 
-        tracer.append([i + 1, x, y, f_half])
+        exact = func(x)
+        error = abs(exact - y)
+        relative_error = error / exact
 
-    print(tabulate(tracer, headers=['i', 'x', 'y', 'f_half']))
+        tracer.append([i + 1, x, y, exact, error, relative_error])
+
+    print(tabulate(tracer, headers=[
+          'i', 'x', 'y', 'exact', 'error', 'relative error']))
 
 
 if __name__ == '__main__':
